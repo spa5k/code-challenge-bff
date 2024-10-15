@@ -17,14 +17,17 @@ As our Sales manager is quite indecisive, we want the pricing rules to be as fle
 
 Our checkout system can scan items in any order.
 
-The interface to our checkout looks like this (shown in typescript):
+The interface to our checkout looks like this (shown in go):
 
-```typescript
-  const co = new Checkout(pricingRules);
-  co.scan(item1);
-  co.scan(item2);
-  co.total();
+```golang
+co := Checkout{
+  pricingRules: pricingRules,
+}
+co.Scan(Item{})
+co.Scan(Item{})
+co.Total()
 ```
+Use any types you think are appropriate and fit for `pricingRules` and `Item`.
 
 Your task is to implement a checkout system that fulfils the requirements described above.
 
@@ -39,7 +42,7 @@ Total expected: $2718.95
 
 Notes on implementation:
 
-- use **Typescript**
+- use **go**
 - try not to spend more than 2 hours maximum. (We don't want you to lose a weekend over this!)
 - don't build guis etc, we're more interested in your approach to solving the given task, not how shiny it looks
 - don't worry about making a command line interface to the application
