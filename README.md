@@ -40,9 +40,9 @@ Total expected: $2718.95
 Notes on implementation:
 
 - use **Typescript**
-- try not to spend more than 2 hours maximum. (We don't want you to lose a weekend over this!)
 - don't build guis etc, we're more interested in your approach to solving the given task, not how shiny it looks
 - don't worry about making a command line interface to the application
 - don't use any frameworks
+- do include unit tests
 
 When you've finished, send through the link to your github-repo.
