@@ -13,3 +13,9 @@ test-cover:
 tidy:
 	gofmt -w .
 	go mod tidy
+
+docker-build:
+	docker build -t zeller_go .
+
+docker-run:
+	docker run -it zeller_go

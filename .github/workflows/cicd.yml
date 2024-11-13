@@ -1,0 +1,59 @@
+name: Run CICD
+
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  gosec:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Run Gosec Security Scanner
+        uses: securego/gosec@master
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.23"
+          cache: true
+      - name: Cache Go Modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            /go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Build
+        run: make build
+      - name: Install and Run Linters
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.60.3
+          golangci-lint run
+      - name: Run Tests
+        run: make test
+
+      - name: Run Test Coverage
+        run: make test-cover
+
+      - name: Docker Build
+        run: make docker-build

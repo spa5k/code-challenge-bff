@@ -125,7 +125,8 @@ func TestEdgeCase_ZeroQuantityPricingRule(t *testing.T) {
 	}
 
 	co := checkout.NewCheckout(pricingRules, catalog)
-	co.Scan(checkout.Item{SKU: "ipd"})
+	err := co.Scan(checkout.Item{SKU: "ipd"})
+	assert.NoError(t, err)
 	total, err := co.Total()
 	assert.NoError(t, err)
 
@@ -160,11 +161,13 @@ func TestEdgeCase_ScanAfterTotal(t *testing.T) {
 	pricingRules := map[string]pricingrules.PricingRule{}
 
 	co := checkout.NewCheckout(pricingRules, catalog)
-	co.Scan(checkout.Item{SKU: "mbp"})
+	err := co.Scan(checkout.Item{SKU: "mbp"})
+	assert.NoError(t, err)
 	total1, err := co.Total()
 	assert.NoError(t, err)
 
-	co.Scan(checkout.Item{SKU: "vga"})
+	err = co.Scan(checkout.Item{SKU: "vga"})
+	assert.NoError(t, err)
 	total2, err := co.Total()
 	assert.NoError(t, err)
 

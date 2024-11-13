@@ -1,0 +1,7 @@
+# .dockerignore
+.git
+build
+random_stuff
+bin
+dist
+
