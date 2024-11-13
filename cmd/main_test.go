@@ -188,7 +188,8 @@ func TestEdgeCase_DiscountedPriceHigherThanOriginal(t *testing.T) {
 
 	co := checkout.NewCheckout(pricingRules, catalog)
 	for i := 0; i < 5; i++ {
-		co.Scan(checkout.Item{SKU: "ipd"})
+		err := co.Scan(checkout.Item{SKU: "ipd"})
+		assert.NoError(t, err)
 	}
 	total, err := co.Total()
 	assert.NoError(t, err)
@@ -207,7 +208,8 @@ func TestEdgeCase_PricingRuleWithNegativePrice(t *testing.T) {
 	}
 
 	co := checkout.NewCheckout(pricingRules, catalog)
-	co.Scan(checkout.Item{SKU: "vga"})
+	err := co.Scan(checkout.Item{SKU: "vga"})
+	assert.NoError(t, err)
 	total, err := co.Total()
 	assert.NoError(t, err)
 
