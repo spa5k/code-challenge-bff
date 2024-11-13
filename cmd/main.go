@@ -4,12 +4,14 @@ import (
 	"log"
 	"log/slog"
 
+	"github.com/spa5k/zeller_go/internal"
 	"github.com/spa5k/zeller_go/internal/catalog"
 	"github.com/spa5k/zeller_go/internal/checkout"
 	"github.com/spa5k/zeller_go/internal/pricingrules"
 )
 
 func main() {
+	logger := internal.NewLogger()
 	catalog := catalog.NewCatalog()
 	pricingRules := map[string]pricingrules.PricingRule{
 		"atv": &pricingrules.ThreeForTwoRule{SKU: "atv"},
@@ -34,7 +36,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	slog.Info("Total price", "total", total1)
+	logger.Info("Scenario 1 Total price", "total", total1)
 
 	// Buy 4 iPads so that the bulk discount rule applies, each ipad is $499.99 * 4 = $1999.96
 	// Scenario 2: SKUs Scanned: ipd, ipd, ipd, ipd
@@ -49,7 +51,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	slog.Info("Total price", "total", total2)
+	logger.Info("Scenario 2 Total price", "total", total2)
 
 	// Edge Case Scenario: Invalid SKU
 	co3 := checkout.NewCheckout(pricingRules, catalog)
@@ -57,7 +59,7 @@ func main() {
 	if err != nil {
 		slog.Error("Error scanning item", "error", err)
 	}
-	slog.Info("Total price", "total", 0)
+	logger.Info("Scenario 3 Total price", "total", 0)
 
 	// Example scenario - SKUs Scanned: atv, atv, atv, vga Total expected: $249.00
 	co4 := checkout.NewCheckout(pricingRules, catalog)
@@ -71,7 +73,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	slog.Info("Total price", "total", total4)
+	logger.Info("Scenario 4 Total price", "total", total4)
 
 	// Example scenario - SKUs Scanned: atv, ipd, ipd, atv, ipd, ipd, ipd Total expected: $2718.95
 	co5 := checkout.NewCheckout(pricingRules, catalog)
@@ -85,5 +87,5 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	slog.Info("Total price", "total", total5)
+	logger.Info("Scenario 5 Total price", "total", total5)
 }

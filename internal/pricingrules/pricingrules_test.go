@@ -2,8 +2,10 @@ package pricingrules_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/exp/rand"
 
 	"github.com/spa5k/zeller_go/internal/catalog"
 	"github.com/spa5k/zeller_go/internal/pricingrules"
@@ -128,4 +130,76 @@ func TestBulkDiscountRule_Apply_NoItems(t *testing.T) {
 	total, err := rule.Apply(items, c)
 	assert.NoError(t, err)
 	assert.Equal(t, 0.0, total)
+}
+
+func TestThreeForTwoRule_Apply_VaryingQuantities(t *testing.T) {
+	rule := &pricingrules.ThreeForTwoRule{SKU: "atv"}
+	c := catalog.NewCatalog()
+
+	rand.Seed(uint64(time.Now().UnixNano()))
+	for i := 0; i < 10; i++ {
+		quantity := rand.Intn(20) // Random quantity between 0 and 19
+		items := make([]pricingrules.Item, quantity)
+		for j := 0; j < quantity; j++ {
+			items[j] = pricingrules.Item{SKU: "atv"}
+		}
+
+		total, err := rule.Apply(items, c)
+		assert.NoError(t, err)
+
+		expectedChargeable := quantity - (quantity / 3)
+		expectedTotal := float64(expectedChargeable) * 109.50
+		assert.Equal(t, expectedTotal, total, "Failed for quantity %d", quantity)
+	}
+}
+
+func TestBulkDiscountRule_Apply_AtThreshold(t *testing.T) {
+	rule := &pricingrules.BulkDiscountRule{
+		SKU:         "ipd",
+		MinQuantity: 5,
+		NewPrice:    499.99,
+	}
+	c := catalog.NewCatalog()
+
+	// Test quantities around the threshold
+	for quantity := 4; quantity <= 6; quantity++ {
+		items := make([]pricingrules.Item, quantity)
+		for i := 0; i < quantity; i++ {
+			items[i] = pricingrules.Item{SKU: "ipd"}
+		}
+
+		total, err := rule.Apply(items, c)
+		assert.NoError(t, err)
+
+		var expectedTotal float64
+		if quantity >= rule.MinQuantity {
+			expectedTotal = float64(quantity) * rule.NewPrice
+		} else {
+			expectedTotal = float64(quantity) * 549.99
+		}
+		assert.Equal(t, expectedTotal, total, "Failed for quantity %d", quantity)
+	}
+}
+
+func TestBulkDiscountRule_Apply_LargeQuantities(t *testing.T) {
+	rule := &pricingrules.BulkDiscountRule{
+		SKU:         "ipd",
+		MinQuantity: 5,
+		NewPrice:    499.99,
+	}
+	c := catalog.NewCatalog()
+
+	quantities := []int{10, 50, 100, 1000}
+	for _, quantity := range quantities {
+		items := make([]pricingrules.Item, quantity)
+		for i := 0; i < quantity; i++ {
+			items[i] = pricingrules.Item{SKU: "ipd"}
+		}
+
+		total, err := rule.Apply(items, c)
+		assert.NoError(t, err)
+
+		expectedTotal := float64(quantity) * rule.NewPrice
+		assert.Equal(t, expectedTotal, total, "Failed for quantity %d", quantity)
+	}
 }

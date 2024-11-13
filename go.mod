@@ -2,7 +2,11 @@ module github.com/spa5k/zeller_go
 
 go 1.23.3
 
-require github.com/stretchr/testify v1.9.0
+require (
+	github.com/lmittmann/tint v1.0.5
+	github.com/stretchr/testify v1.9.0
+	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
