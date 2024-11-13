@@ -43,41 +43,56 @@ func NewCatalog() *Catalog {
 	}
 }
 
-func (c *Catalog) GetProducts(sku string) ([]Product, error) {
-	if sku == "" {
-		logger.Error("SKU cannot be empty")
-		return nil, internal.NewEmptySKUError("GetProducts")
+func (c *Catalog) GetProducts(ctx context.Context, sku string) ([]Product, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		if sku == "" {
+			logger.Error("SKU cannot be empty")
+			return nil, internal.NewEmptySKUError("GetProducts")
+		}
+		products, ok := c.products[sku]
+		if !ok || len(products) == 0 {
+			logger.Error("Product with SKU not found", "sku", sku)
+			return nil, internal.NewProductNotFoundError(sku)
+		}
+		return products, nil
 	}
-	products, ok := c.products[sku]
-	if !ok || len(products) == 0 {
-		logger.Error("Product with SKU not found", "sku", sku)
-		return nil, internal.NewProductNotFoundError(sku)
-	}
-	return products, nil
 }
 
 func (c *Catalog) Products() map[string][]Product {
 	return c.products
 }
 
-func (c *Catalog) AddProduct(product Product) error {
-	logger := internal.GetLogger(context.Background())
-	logger.Info("Adding product", "product", product)
-	if product.SKU == "" {
-		logger.Error("Product SKU cannot be empty")
-		return internal.NewEmptySKUError("AddProduct")
+func (c *Catalog) AddProduct(ctx context.Context, product Product) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		logger := internal.GetLogger(ctx)
+		logger.Info("Adding product", "product", product)
+		if product.SKU == "" {
+			logger.Error("Product SKU cannot be empty")
+			return internal.NewEmptySKUError("AddProduct")
+		}
+		c.products[product.SKU] = append(c.products[product.SKU], product)
+		return nil
 	}
-	c.products[product.SKU] = append(c.products[product.SKU], product)
-	return nil
 }
 
-func (c *Catalog) GetProduct(sku string) (Product, error) {
-	logger := internal.GetLogger(context.Background())
-	logger.Info("Getting product", "sku", sku)
-	products, err := c.GetProducts(sku)
-	if err != nil {
-		return Product{}, err
+func (c *Catalog) GetProduct(ctx context.Context, sku string) (Product, error) {
+	select {
+	case <-ctx.Done():
+		return Product{}, ctx.Err()
+	default:
+		logger := internal.GetLogger(ctx)
+		logger.Info("Getting product", "sku", sku)
+		products, err := c.GetProducts(ctx, sku)
+		if err != nil {
+			return Product{}, err
+		}
+		logger.Info("Product found", "product", products[0])
+		return products[0], nil
 	}
-	logger.Info("Product found", "product", products[0])
-	return products[0], nil
 }

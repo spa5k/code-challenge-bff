@@ -1,6 +1,7 @@
 package checkout
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/shopspring/decimal"
@@ -29,7 +30,7 @@ func (c *Checkout) Scan(item Item) error {
 	if item.SKU == "" {
 		return fmt.Errorf("Item SKU cannot be empty")
 	}
-	_, err := c.catalog.GetProduct(item.SKU)
+	_, err := c.catalog.GetProduct(context.Background(), item.SKU)
 	if err != nil {
 		return err
 	}
@@ -52,7 +53,7 @@ func (c *Checkout) Total() (float64, error) {
 			}
 			total += price
 		} else {
-			product, err := c.catalog.GetProduct(sku)
+			product, err := c.catalog.GetProduct(context.Background(), sku)
 			if err != nil {
 				return 0, err
 			}

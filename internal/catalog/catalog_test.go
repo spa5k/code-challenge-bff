@@ -1,6 +1,7 @@
 package catalog_test
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"testing"
@@ -12,7 +13,7 @@ import (
 
 func TestGetProducts_Success(t *testing.T) {
 	c := catalog.NewCatalog()
-	products, err := c.GetProducts("ipd")
+	products, err := c.GetProducts(context.Background(), "ipd")
 	assert.NoError(t, err)
 	assert.Len(t, products, 1)
 	product := products[0]
@@ -23,14 +24,14 @@ func TestGetProducts_Success(t *testing.T) {
 
 func TestGetProducts_EmptySKU(t *testing.T) {
 	c := catalog.NewCatalog()
-	_, err := c.GetProducts("")
+	_, err := c.GetProducts(context.Background(), "")
 	assert.Error(t, err)
 	assert.EqualError(t, err, "empty SKU provided: GetProducts")
 }
 
 func TestGetProducts_ProductNotFound(t *testing.T) {
 	c := catalog.NewCatalog()
-	_, err := c.GetProducts("unknown")
+	_, err := c.GetProducts(context.Background(), "unknown")
 	assert.Error(t, err)
 	assert.EqualError(t, err, "product not found: unknown")
 }
@@ -43,9 +44,9 @@ func TestNewCatalog(t *testing.T) {
 
 func TestGetProducts_NegativePrice(t *testing.T) {
 	c := catalog.NewCatalog()
-	err := c.AddProduct(catalog.Product{SKU: "negprice", Name: "Negative Price Product", Price: decimal.NewFromFloat(-99.99)})
+	err := c.AddProduct(context.Background(), catalog.Product{SKU: "negprice", Name: "Negative Price Product", Price: decimal.NewFromFloat(-99.99)})
 	assert.NoError(t, err)
-	products, err := c.GetProducts("negprice")
+	products, err := c.GetProducts(context.Background(), "negprice")
 	assert.NoError(t, err)
 	assert.Len(t, products, 1)
 	assert.Equal(t, decimal.NewFromFloat(-99.99), products[0].Price)
@@ -53,9 +54,9 @@ func TestGetProducts_NegativePrice(t *testing.T) {
 
 func TestGetProducts_ZeroPrice(t *testing.T) {
 	c := catalog.NewCatalog()
-	err := c.AddProduct(catalog.Product{SKU: "zeroprice", Name: "Zero Price Product", Price: decimal.NewFromFloat(0.0)})
+	err := c.AddProduct(context.Background(), catalog.Product{SKU: "zeroprice", Name: "Zero Price Product", Price: decimal.NewFromFloat(0.0)})
 	assert.NoError(t, err)
-	products, err := c.GetProducts("zeroprice")
+	products, err := c.GetProducts(context.Background(), "zeroprice")
 	assert.NoError(t, err)
 	assert.Len(t, products, 1)
 	assert.Equal(t, decimal.NewFromFloat(0.0), products[0].Price)
@@ -66,7 +67,7 @@ func TestGetProducts_LargeCatalog(t *testing.T) {
 	numProducts := 1000
 	for i := 0; i < numProducts; i++ {
 		sku := fmt.Sprintf("sku%04d", i) // Ensure the format string is in quotes
-		err := c.AddProduct(catalog.Product{SKU: sku, Name: "Product " + sku, Price: decimal.NewFromFloat(float64(i))})
+		err := c.AddProduct(context.Background(), catalog.Product{SKU: sku, Name: "Product " + sku, Price: decimal.NewFromFloat(float64(i))})
 		assert.NoError(t, err)
 	}
 	initialProductCount := 4 // Number of initial products
@@ -76,9 +77,9 @@ func TestGetProducts_LargeCatalog(t *testing.T) {
 
 func TestGetProducts_MaxFloatPrice(t *testing.T) {
 	c := catalog.NewCatalog()
-	err := c.AddProduct(catalog.Product{SKU: "maxfloat", Name: "Max Float Price Product", Price: decimal.NewFromFloat(math.MaxFloat64)})
+	err := c.AddProduct(context.Background(), catalog.Product{SKU: "maxfloat", Name: "Max Float Price Product", Price: decimal.NewFromFloat(math.MaxFloat64)})
 	assert.NoError(t, err)
-	products, err := c.GetProducts("maxfloat")
+	products, err := c.GetProducts(context.Background(), "maxfloat")
 	assert.NoError(t, err)
 	assert.Len(t, products, 1)
 	assert.Equal(t, decimal.NewFromFloat(math.MaxFloat64), products[0].Price)
@@ -86,17 +87,17 @@ func TestGetProducts_MaxFloatPrice(t *testing.T) {
 
 func TestAddProduct_EmptySKU(t *testing.T) {
 	c := catalog.NewCatalog()
-	err := c.AddProduct(catalog.Product{SKU: "", Name: "Empty SKU Product", Price: decimal.NewFromFloat(100.0)})
+	err := c.AddProduct(context.Background(), catalog.Product{SKU: "", Name: "Empty SKU Product", Price: decimal.NewFromFloat(100.0)})
 	assert.Error(t, err)
 	assert.EqualError(t, err, "empty SKU provided: AddProduct")
 }
 
 func TestAddProduct_EmptyName(t *testing.T) {
 	c := catalog.NewCatalog()
-	err := c.AddProduct(catalog.Product{SKU: "emptyname", Name: "", Price: decimal.NewFromFloat(100.0)})
+	err := c.AddProduct(context.Background(), catalog.Product{SKU: "emptyname", Name: "", Price: decimal.NewFromFloat(100.0)})
 	// Assuming that the catalog allows empty product names
 	assert.NoError(t, err)
-	products, err := c.GetProducts("emptyname")
+	products, err := c.GetProducts(context.Background(), "emptyname")
 	assert.NoError(t, err)
 	assert.Len(t, products, 1)
 	assert.Equal(t, "", products[0].Name)
@@ -104,12 +105,12 @@ func TestAddProduct_EmptyName(t *testing.T) {
 
 func TestAddProduct_DuplicateSKU(t *testing.T) {
 	c := catalog.NewCatalog()
-	err := c.AddProduct(catalog.Product{SKU: "duplicate", Name: "Duplicate SKU Product", Price: decimal.NewFromFloat(100.0)})
+	err := c.AddProduct(context.Background(), catalog.Product{SKU: "duplicate", Name: "Duplicate SKU Product", Price: decimal.NewFromFloat(100.0)})
 	assert.NoError(t, err)
-	err = c.AddProduct(catalog.Product{SKU: "duplicate", Name: "Duplicate SKU Product 2", Price: decimal.NewFromFloat(200.0)})
+	err = c.AddProduct(context.Background(), catalog.Product{SKU: "duplicate", Name: "Duplicate SKU Product 2", Price: decimal.NewFromFloat(200.0)})
 	assert.NoError(t, err)
 
-	products, err := c.GetProducts("duplicate")
+	products, err := c.GetProducts(context.Background(), "duplicate")
 	assert.NoError(t, err)
 	assert.Len(t, products, 2)
 
@@ -124,10 +125,10 @@ func TestAddProduct_DuplicateSKU(t *testing.T) {
 func TestGetProducts_MultipleProductsPerSKU(t *testing.T) {
 	c := catalog.NewCatalog()
 	// Add multiple products with the same SKU
-	err := c.AddProduct(catalog.Product{SKU: "ipd", Name: "Super iPad Pro", Price: decimal.NewFromFloat(649.99)})
+	err := c.AddProduct(context.Background(), catalog.Product{SKU: "ipd", Name: "Super iPad Pro", Price: decimal.NewFromFloat(649.99)})
 	assert.NoError(t, err)
 
-	products, err := c.GetProducts("ipd")
+	products, err := c.GetProducts(context.Background(), "ipd")
 	assert.NoError(t, err)
 	assert.Len(t, products, 2)
 

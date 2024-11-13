@@ -1,6 +1,8 @@
 package pricingrules
 
 import (
+	"context"
+
 	"github.com/shopspring/decimal"
 	"github.com/spa5k/zeller_go/internal/catalog"
 )
@@ -22,7 +24,7 @@ func (r *ThreeForTwoRule) Apply(items []Item, catalog *catalog.Catalog) (float64
 	if len(items) == 0 {
 		return 0, nil
 	}
-	product, err := catalog.GetProduct(r.SKU)
+	product, err := catalog.GetProduct(context.Background(), r.SKU)
 	if err != nil {
 		return 0, err
 	}
@@ -44,7 +46,7 @@ func (r *BulkDiscountRule) Apply(items []Item, catalog *catalog.Catalog) (float6
 	if len(items) == 0 {
 		return 0, nil
 	}
-	product, err := catalog.GetProduct(r.SKU)
+	product, err := catalog.GetProduct(context.Background(), r.SKU)
 	if err != nil {
 		return 0, err
 	}

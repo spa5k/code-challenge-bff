@@ -1,6 +1,7 @@
 package checkout_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -144,7 +145,7 @@ func TestCheckout_RandomBaskets(t *testing.T) {
 		// Calculate expected total
 		// Apply pricing rules manually for validation
 		for sku, count := range itemCounts {
-			product, _ := c.GetProduct(sku)
+			product, _ := c.GetProduct(context.Background(), sku)
 			switch sku {
 			case "atv":
 				freeItems := count / 3
@@ -218,7 +219,7 @@ func TestCheckout_BoundaryQuantities(t *testing.T) {
 		}
 
 		for sku, count := range itemCounts {
-			product, _ := c.GetProduct(sku)
+			product, _ := c.GetProduct(context.Background(), sku)
 			switch sku {
 			case "atv":
 				freeItems := count / 3
