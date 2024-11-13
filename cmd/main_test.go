@@ -63,7 +63,7 @@ func TestInvalidSKU(t *testing.T) {
 	co := checkout.NewCheckout(pricingRules, catalog)
 	err := co.Scan(checkout.Item{SKU: "unknown"})
 	assert.Error(t, err)
-	assert.EqualError(t, err, "Product with SKU 'unknown' not found")
+	assert.EqualError(t, err, "product not found: unknown")
 }
 
 func TestScenario3(t *testing.T) {

@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/shopspring/decimal"
 	"github.com/spa5k/zeller_go/internal/catalog"
 	"github.com/spa5k/zeller_go/internal/checkout"
 	"github.com/spa5k/zeller_go/internal/pricingrules"
@@ -148,15 +149,15 @@ func TestCheckout_RandomBaskets(t *testing.T) {
 			case "atv":
 				freeItems := count / 3
 				chargeable := count - freeItems
-				expectedTotal += float64(chargeable) * product.Price
+				expectedTotal += product.Price.Mul(decimal.NewFromInt(int64(chargeable))).InexactFloat64()
 			case "ipd":
 				if count >= 5 {
 					expectedTotal += float64(count) * 499.99
 				} else {
-					expectedTotal += float64(count) * product.Price
+					expectedTotal += product.Price.Mul(decimal.NewFromInt(int64(count))).InexactFloat64()
 				}
 			default:
-				expectedTotal += float64(count) * product.Price
+				expectedTotal += product.Price.Mul(decimal.NewFromInt(int64(count))).InexactFloat64()
 			}
 		}
 
@@ -222,15 +223,15 @@ func TestCheckout_BoundaryQuantities(t *testing.T) {
 			case "atv":
 				freeItems := count / 3
 				chargeable := count - freeItems
-				expectedTotal += float64(chargeable) * product.Price
+				expectedTotal += product.Price.Mul(decimal.NewFromInt(int64(chargeable))).InexactFloat64()
 			case "ipd":
 				if count >= 5 {
 					expectedTotal += float64(count) * 499.99
 				} else {
-					expectedTotal += float64(count) * product.Price
+					expectedTotal += product.Price.Mul(decimal.NewFromInt(int64(count))).InexactFloat64()
 				}
 			default:
-				expectedTotal += float64(count) * product.Price
+				expectedTotal += product.Price.Mul(decimal.NewFromInt(int64(count))).InexactFloat64()
 			}
 		}
 

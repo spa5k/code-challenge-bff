@@ -3,6 +3,7 @@ package checkout
 import (
 	"fmt"
 
+	"github.com/shopspring/decimal"
 	"github.com/spa5k/zeller_go/internal/catalog"
 	"github.com/spa5k/zeller_go/internal/pricingrules"
 )
@@ -55,7 +56,8 @@ func (c *Checkout) Total() (float64, error) {
 			if err != nil {
 				return 0, err
 			}
-			total += float64(len(items)) * product.Price
+			itemCount := decimal.NewFromInt(int64(len(items)))
+			total += itemCount.Mul(product.Price).InexactFloat64()
 		}
 	}
 	return total, nil

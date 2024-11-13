@@ -1,6 +1,7 @@
 package pricingrules
 
 import (
+	"github.com/shopspring/decimal"
 	"github.com/spa5k/zeller_go/internal/catalog"
 )
 
@@ -28,7 +29,7 @@ func (r *ThreeForTwoRule) Apply(items []Item, catalog *catalog.Catalog) (float64
 	count := len(items)
 	freeItems := count / 3
 	chargeableCount := count - freeItems
-	totalPrice := float64(chargeableCount) * product.Price
+	totalPrice := product.Price.Mul(decimal.NewFromInt(int64(chargeableCount))).InexactFloat64()
 	return totalPrice, nil
 }
 
@@ -51,5 +52,5 @@ func (r *BulkDiscountRule) Apply(items []Item, catalog *catalog.Catalog) (float6
 	if count >= r.MinQuantity {
 		return float64(count) * r.NewPrice, nil
 	}
-	return float64(count) * product.Price, nil
+	return product.Price.Mul(decimal.NewFromInt(int64(count))).InexactFloat64(), nil
 }

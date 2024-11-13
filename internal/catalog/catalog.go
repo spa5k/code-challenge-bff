@@ -2,16 +2,16 @@ package catalog
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
+	"github.com/shopspring/decimal"
 	"github.com/spa5k/zeller_go/internal"
 )
 
 type Product struct {
 	SKU   string
 	Name  string
-	Price float64
+	Price decimal.Decimal
 }
 
 type Catalog struct {
@@ -28,16 +28,16 @@ func NewCatalog() *Catalog {
 	return &Catalog{
 		products: map[string][]Product{
 			"ipd": {
-				{SKU: "ipd", Name: "Super iPad", Price: 549.99},
+				{SKU: "ipd", Name: "Super iPad", Price: decimal.NewFromFloat(549.99)},
 			},
 			"mbp": {
-				{SKU: "mbp", Name: "MacBook Pro", Price: 1399.99},
+				{SKU: "mbp", Name: "MacBook Pro", Price: decimal.NewFromFloat(1399.99)},
 			},
 			"atv": {
-				{SKU: "atv", Name: "Apple TV", Price: 109.50},
+				{SKU: "atv", Name: "Apple TV", Price: decimal.NewFromFloat(109.50)},
 			},
 			"vga": {
-				{SKU: "vga", Name: "VGA adapter", Price: 30.00},
+				{SKU: "vga", Name: "VGA adapter", Price: decimal.NewFromFloat(30.00)},
 			},
 		},
 	}
@@ -46,12 +46,12 @@ func NewCatalog() *Catalog {
 func (c *Catalog) GetProducts(sku string) ([]Product, error) {
 	if sku == "" {
 		logger.Error("SKU cannot be empty")
-		return nil, fmt.Errorf("SKU cannot be empty")
+		return nil, internal.NewEmptySKUError("GetProducts")
 	}
 	products, ok := c.products[sku]
 	if !ok || len(products) == 0 {
 		logger.Error("Product with SKU not found", "sku", sku)
-		return nil, fmt.Errorf("Product with SKU '%s' not found", sku)
+		return nil, internal.NewProductNotFoundError(sku)
 	}
 	return products, nil
 }
@@ -65,7 +65,7 @@ func (c *Catalog) AddProduct(product Product) error {
 	logger.Info("Adding product", "product", product)
 	if product.SKU == "" {
 		logger.Error("Product SKU cannot be empty")
-		return fmt.Errorf("Product SKU cannot be empty")
+		return internal.NewEmptySKUError("AddProduct")
 	}
 	c.products[product.SKU] = append(c.products[product.SKU], product)
 	return nil
